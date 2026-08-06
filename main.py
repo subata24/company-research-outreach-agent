@@ -1,24 +1,14 @@
-# Temporary file for testing tools during development.
+"""
+Main entry point for the Company Research & Outreach Agent.
+
+This file is used to run and test the application during development.
+The actual workflow will be connected here once the LangGraph graph is complete.
+"""
 
 
-#from app.tools.search import search_web
-
-#results = search_web("Tesla latest news")
-
-#for result in results:
-    #print(f"Title: {result['title']}")
-    #print(f"URL: {result['href']}")
-    #print(f"Summary: {result['body']}")
-    #print("-" * 50)
+def main():
+    print("🚀 Company Research & Outreach Agent")
 
 
-#from app.tools.company import company_overview
-
-#results = company_overview("Microsoft")
-
-#for result in results:
-    #print(result["title"])
-    #print(result["href"])
-    #print(result["body"])
-    #print("-" * 50)
-
+if __name__ == "__main__":
+    main()
