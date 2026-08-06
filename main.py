@@ -12,12 +12,13 @@
     #print("-" * 50)
 
 
-from app.tools.company import company_overview
+#from app.tools.company import company_overview
 
-results = company_overview("Microsoft")
+#results = company_overview("Microsoft")
 
-for result in results:
-    print(result["title"])
-    print(result["href"])
-    print(result["body"])
-    print("-" * 50)
+#for result in results:
+    #print(result["title"])
+    #print(result["href"])
+    #print(result["body"])
+    #print("-" * 50)
+
