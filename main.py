@@ -1,13 +1,23 @@
 """
 Main entry point for the Company Research & Outreach Agent.
-
-This file is used to run and test the application during development.
-The actual workflow will be connected here once the LangGraph graph is complete.
 """
+
+from app.graph.workflow import graph
 
 
 def main():
-    print("🚀 Company Research & Outreach Agent")
+    initial_state = {
+        "company_name": "Microsoft",
+        "overview": [],
+        "news": [],
+        "search_query": "",
+        "enough_information": False,
+        "email": "",
+    }
+
+    result = graph.invoke(initial_state)
+
+    print(result)
 
 
 if __name__ == "__main__":

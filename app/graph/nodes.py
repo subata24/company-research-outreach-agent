@@ -11,6 +11,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from app.graph.state import AgentState
 from app.tools.company import company_overview
 from app.prompts.search import SEARCH_QUERY_PROMPT
+from app.tools.search import search_web
+from app.prompts.evaluation import EVALUATION_PROMPT
+from app.prompts.email import EMAIL_PROMPT
 
 # Load environment variables
 load_dotenv()
@@ -51,15 +54,49 @@ def generate_search_query(state: AgentState) -> dict:
 
 def search_company_news(state: AgentState) -> dict:
     """
-    Placeholder node.
-
-    This node will execute the generated search query
-    and return recent company news.
+    Search for recent company news using the generated search query.
     """
-    print("Searching recent company news...")
+    news = search_web.invoke(state["search_query"])
 
-    return {}
+    return {
+        "news": news
+    }
 
+def evaluate_information(state: AgentState) -> dict:
+    """
+    Determine whether enough information has been collected.
+    """
+
+    prompt = EVALUATION_PROMPT.format(
+        company_name=state["company_name"],
+        overview=state["overview"],
+        news=state["news"],
+    )
+
+    response = llm.invoke(prompt)
+
+    decision = response.text.strip().upper()
+
+    return {
+        "enough_information": decision == "YES"
+    }
+
+def write_email(state: AgentState) -> dict:
+    """
+    Generate a personalized outreach email.
+    """
+
+    prompt = EMAIL_PROMPT.format(
+        company_name=state["company_name"],
+        overview=state["overview"],
+        news=state["news"],
+    )
+
+    response = llm.invoke(prompt)
+
+    return {
+        "email": response.text.strip()
+    }
 
 if __name__ == "__main__":
     test_state = {
