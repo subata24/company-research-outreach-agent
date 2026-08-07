@@ -14,6 +14,7 @@ from app.prompts.search import SEARCH_QUERY_PROMPT
 from app.tools.search import search_web
 from app.prompts.evaluation import EVALUATION_PROMPT
 from app.prompts.email import EMAIL_PROMPT
+from app.utils.formatter import format_search_results
 
 # Load environment variables
 load_dotenv()
@@ -41,7 +42,7 @@ def generate_search_query(state: AgentState) -> dict:
     """
     prompt = SEARCH_QUERY_PROMPT.format(
         company_name=state["company_name"],
-        overview=state["overview"],
+        overview=format_search_results(state["overview"])
     )
 
     response = llm.invoke(prompt)
@@ -69,8 +70,8 @@ def evaluate_information(state: AgentState) -> dict:
 
     prompt = EVALUATION_PROMPT.format(
         company_name=state["company_name"],
-        overview=state["overview"],
-        news=state["news"],
+        overview=format_search_results(state["overview"]),
+        news=format_search_results(state["news"])
     )
 
     response = llm.invoke(prompt)
@@ -87,9 +88,9 @@ def write_email(state: AgentState) -> dict:
     """
 
     prompt = EMAIL_PROMPT.format(
-        company_name=state["company_name"],
-        overview=state["overview"],
-        news=state["news"],
+    company_name=state["company_name"],
+    overview=format_search_results(state["overview"]),
+    news=format_search_results(state["news"]),
     )
 
     response = llm.invoke(prompt)
@@ -97,6 +98,28 @@ def write_email(state: AgentState) -> dict:
     return {
         "email": response.text.strip()
     }
+
+
+
+
+def generate_followup_search_query(state: AgentState) -> dict:
+    """
+    Generate a follow-up search query if the initial information is insufficient."""
+
+    prompt = FOLLOWUP_SEARCH_PROMPT.format(
+        company_name=state["company_name"],
+        overview=format_search_results(state["overview"]),
+        news=format_search_results(state["news"])
+    )
+
+    response = llm.invoke(prompt)
+    search_query = response.text.strip()
+
+    return {
+    "search_query": response.text.strip(),
+    "retry_count": state["retry_count"] + 1,
+}
+
 
 if __name__ == "__main__":
     test_state = {
