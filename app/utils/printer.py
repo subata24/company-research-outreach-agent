@@ -24,6 +24,25 @@ def print_report(state: dict):
             print(f"\n{index}. {news_item.get('title', 'N/A')}")
             print(f"   {news_item.get('body', 'N/A')}")
 
+    print("\n🧠 Research Evaluation")
+    print("-" * 70)
+
+    status = "Yes" if state["enough_information"] else "No"
+    print(f"Enough information: {status}")
+
+    print("\nReasoning:")
+    print(state.get("evaluation_reasoning", "No reasoning available."))
+
+    print("\nMissing information:")
+
+    missing = state.get("missing_information", [])
+
+    if missing:
+        for item in missing:
+            print(f"- {item}")
+    else:
+        print("None")
+
     print("\n" + "=" * 70)
     print("✉️ GENERATED OUTREACH EMAIL")
     print("=" * 70)

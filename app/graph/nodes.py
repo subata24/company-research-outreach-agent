@@ -16,7 +16,10 @@ from app.prompts.evaluation import EVALUATION_PROMPT
 from app.prompts.email import EMAIL_PROMPT
 from app.prompts.followup import FOLLOWUP_SEARCH_PROMPT
 from app.utils.formatter import format_search_results
+from app.schemas.evaluation import ResearchEvaluation
+from app.utils.logger import get_logger
 
+logger = get_logger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -27,7 +30,8 @@ llm = ChatGoogleGenerativeAI(
 )
 
 #llm = ChatGoogleGenerativeAI(
-    #model="gemini-3.6-flash")
+    #model="gemini-3.6-flash"
+#)
 
 
 def get_company_overview(state: AgentState) -> dict:
@@ -36,8 +40,16 @@ def get_company_overview(state: AgentState) -> dict:
     """
 
     try:
+        logger.info(
+            f"get_company_overview | Started for {state['company_name']}"
+        )
+
         overview = company_overview.invoke(
             state["company_name"]
+        )
+
+        logger.info(
+            "get_company_overview | Retrieved overview"
         )
 
         return {
@@ -63,8 +75,14 @@ def generate_search_query(state: AgentState) -> dict:
             overview=format_search_results(state["overview"])
         )
 
+        logger.info("generate_search_query | Started")
+
         response = llm.invoke(prompt)
         search_query = response.text.strip()
+
+        logger.info(
+            f"generate_search_query | Query: {search_query}"
+        )
 
         return {
             "search_query": search_query
@@ -83,9 +101,13 @@ def search_company_news(state: AgentState) -> dict:
     Search for recent company news using the generated search query.
     """
 
+    logger.info("search_company_news | Started")
+
     try:
-        news = search_web.invoke(
-            state["search_query"]
+        news = search_web.invoke(state["search_query"])
+
+        logger.info(
+            f"search_company_news | Retrieved {len(news)} results"
         )
 
         return {
@@ -93,36 +115,52 @@ def search_company_news(state: AgentState) -> dict:
         }
 
     except Exception as e:
-        print(f"❌ Failed to search company news: {e}")
+        logger.error(
+            f"search_company_news | Search failed: {e}"
+        )
 
         return {
             "news": []
         }
 
-
 def evaluate_information(state: AgentState) -> dict:
     """
-    Determine whether enough information has been collected.
+    Determine whether enough information has been collected
+    using structured LLM output.
     """
 
+    prompt = EVALUATION_PROMPT.format(
+        company_name=state["company_name"],
+        overview=format_search_results(state["overview"]),
+        news=format_search_results(state["news"])
+    )
+
     try:
-        prompt = EVALUATION_PROMPT.format(
-            company_name=state["company_name"],
-            overview=format_search_results(state["overview"]),
-            news=format_search_results(state["news"])
+        logger.info("evaluate_information | Started")
+
+        structured_llm = llm.with_structured_output(ResearchEvaluation)
+
+        evaluation = structured_llm.invoke(prompt)
+
+        logger.info(
+            f"evaluate_information | enough_info={evaluation.enough_info}"
         )
 
-        response = llm.invoke(prompt)
-
-        decision = response.text.strip().upper()
+        logger.info(
+            f"evaluate_information | reasoning={evaluation.reasoning}"
+        )
 
         return {
-            "enough_information": decision == "YES",
+            "enough_information": evaluation.enough_info,
+            "evaluation_reasoning": evaluation.reasoning,
+            "missing_information": evaluation.missing_info,
             "retry_count": state["retry_count"] + 1,
         }
 
     except Exception as e:
-        print(f"❌ Failed to evaluate information: {e}")
+        logger.error(
+            f"evaluate_information | Evaluation failed: {e}"
+        )
 
         # If evaluation fails, don't keep retrying indefinitely.
         return {
@@ -176,6 +214,8 @@ def write_email(state: AgentState) -> dict:
     """
 
     try:
+        logger.info("write_email | Started")
+
         prompt = EMAIL_PROMPT.format(
             company_name=state["company_name"],
             overview=format_search_results(state["overview"]),
@@ -184,12 +224,18 @@ def write_email(state: AgentState) -> dict:
 
         response = llm.invoke(prompt)
 
+        logger.info(
+            "write_email | Email generated successfully"
+        )
+
         return {
             "email": response.text.strip()
         }
 
     except Exception as e:
-        print(f"❌ Failed to generate email: {e}")
+        logger.error(
+            f"write_email | Email generation failed: {e}"
+        )
 
         return {
             "email": (

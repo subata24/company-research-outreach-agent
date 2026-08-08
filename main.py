@@ -21,14 +21,16 @@ def main():
         break
 
     initial_state = {
-        "company_name": company_name,
-        "overview": [],
-        "news": [],
-        "search_query": "",
-        "enough_information": False,
-        "email": "",
-        "retry_count": 0,
-    }
+    "company_name": company_name,
+    "overview": [],
+    "news": [],
+    "search_query": "",
+    "enough_information": False,
+    "evaluation_reasoning": "",
+    "missing_information": [],
+    "email": "",
+    "retry_count": 0,
+}
 
     print("\n" + "=" * 60)
     print("🚀 Company Research & Outreach Agent")

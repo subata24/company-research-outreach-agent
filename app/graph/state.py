@@ -15,5 +15,7 @@ class AgentState(TypedDict):
     news: list
     search_query: str
     enough_information: bool
+    evaluation_reasoning: str
+    missing_information: list[str]
     email: str
     retry_count: int

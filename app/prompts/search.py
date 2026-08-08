@@ -3,27 +3,41 @@ Prompt templates for search-related agent tasks.
 """
 
 SEARCH_QUERY_PROMPT = """
-You are helping personalize a professional job outreach email.
-
-Today's year is 2026.
+You are an AI research assistant researching a company for a personalized internship outreach email.
 
 Company:
 {company_name}
 
-Overview:
+Company Overview:
 {overview}
 
-Your task is to determine what recent information would make the outreach
-email more personalized and relevant.
+Generate ONE focused Google search query for recent, meaningful company developments.
 
-Generate ONE Google search query that will retrieve recent and meaningful
-company news.
+The search should prioritize information useful for personalizing an AI/ML internship outreach email.
 
-Rules:
-- Return ONLY the search query.
-- Do NOT explain your reasoning.
-- Do NOT use markdown.
-- Do NOT use quotation marks.
-- Do NOT use backticks.
-- Use the current year (2026) if a year is needed.
+Look for:
+- Recent AI or technology initiatives
+- Product or platform launches
+- Major engineering developments
+- Research or infrastructure announcements
+- Strategic partnerships relevant to AI/technology
+- Recent company announcements
+
+Avoid:
+- Stock prices
+- Financial-market pages
+- Generic company profile pages
+- Wikipedia
+- Job aggregators
+- Unrelated entertainment or consumer content
+- Generic "latest news" queries
+
+Prefer recent sources from:
+- The company's official website/newsroom
+- Reputable technology publications
+- Major business publications
+- Official company announcements
+
+Return ONLY the search query.
+Do not explain.
 """
