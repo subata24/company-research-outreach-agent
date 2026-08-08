@@ -40,20 +40,16 @@ Email     Search
    │         └────→ Search News
    ↓
 Final Report
+```
 
 ---
 
 ## 🛠️ Tech Stack
 
-*   **Core:** Python
-*   **Agent Framework:** LangGraph, LangChain
-*   **LLM Provider:** Google Gemini
-*   **Search Engine:** Tavily / Web Search
-*   **Type Safety & Configuration:** TypedDict, python-dotenv
-
----
-
-
+- **Core:** Python
+- **Agent Framework:** LangGraph, LangChain
+- **LLM Provider:** Google Gemini
+- **Search Engine:** Tavily / Web Search
 
 ---
 
