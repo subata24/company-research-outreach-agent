@@ -3,21 +3,19 @@ Utility functions for displaying workflow results.
 """
 
 
-def print_report(state: dict) -> None:
-    """Display the final company research report and generated email."""
+def print_report(state: dict):
+    print("\n" + "=" * 70)
+    print("📊 COMPANY RESEARCH REPORT")
+    print("=" * 70)
 
-    print("\n" + "=" * 60)
-    print("Company Research Report")
-    print("=" * 60)
+    print(f"\n🏢 Company: {state['company_name']}")
 
-    print(f"\nCompany: {state['company_name']}")
+    print("\n🔎 Search Query Used")
+    print("-" * 70)
+    print(state["search_query"])
 
-    print("\nSearch Query Used")
-    print("-" * 60)
-    print(state.get("search_query", "N/A"))
-
-    print("\nLatest News")
-    print("-" * 60)
+    print("\n📰 Latest News")
+    print("-" * 70)
 
     if not state["news"]:
         print("No recent news found.")
@@ -26,8 +24,12 @@ def print_report(state: dict) -> None:
             print(f"\n{index}. {news_item.get('title', 'N/A')}")
             print(f"   {news_item.get('body', 'N/A')}")
 
-    print("\n" + "=" * 60)
-    print("Generated Outreach Email")
-    print("=" * 60)
+    print("\n" + "=" * 70)
+    print("✉️ GENERATED OUTREACH EMAIL")
+    print("=" * 70)
 
-    print(state.get("email", "No email generated."))
+    print(state["email"])
+
+    print("\n" + "=" * 70)
+    print("✅ END OF REPORT")
+    print("=" * 70)

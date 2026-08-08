@@ -10,10 +10,15 @@ def main():
     while True:
         company_name = input("Enter company name: ").strip()
 
-        if company_name:
-            break
+        if not company_name:
+            print("❌ Company name cannot be empty. Please try again.")
+            continue
 
-        print("❌ Company name cannot be empty. Please try again.")
+        if len(company_name) < 2:
+            print("❌ Company name is too short. Please enter a valid company name.")
+            continue
+
+        break
 
     initial_state = {
         "company_name": company_name,
@@ -34,11 +39,23 @@ def main():
 
     result = None
 
-    for state in graph.stream(initial_state, stream_mode="values"):
-        result = state
+    try:
+        for state in graph.stream(
+            initial_state,
+            stream_mode="values",
+        ):
+            result = state
 
-    print("✅ Research completed successfully!\n")
+    except Exception as e:
+        print("\n❌ The research workflow failed.")
+        print(f"Reason: {e}")
+        return
 
+    if result is None:
+        print("\n❌ No result was produced.")
+        return
+
+    print("\n✅ Research completed successfully!")
     print_report(result)
 
 
