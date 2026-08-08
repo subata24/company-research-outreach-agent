@@ -120,15 +120,3 @@ def generate_followup_search_query(state: AgentState) -> dict:
     "retry_count": state["retry_count"] + 1,
 }
 
-
-if __name__ == "__main__":
-    test_state = {
-        "company_name": "Microsoft",
-        "overview": company_overview.invoke("Microsoft"),
-        "news": [],
-        "search_query": "",
-        "enough_information": False,
-        "email": "",
-    }
-
-    print(generate_search_query(test_state))
