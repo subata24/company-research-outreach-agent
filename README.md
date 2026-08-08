@@ -94,8 +94,8 @@ python main.py
 - ✅ Company overview retrieval
 - ✅ Recent news retrieval
 - ✅ Personalized email generation
-- 🔄 Agentic retry loop
-- 🔄 Multi-step reasoning
+- ✅ Agentic retry loop
+- ✅ Multi-step reasoning
 - 🔄 Better console progress tracking
 - 🔄 Markdown/PDF report export
 - 🔄 Company careers page research
