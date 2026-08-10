@@ -57,7 +57,9 @@ def get_company_overview(state: AgentState) -> dict:
         }
 
     except Exception as e:
-        print(f"❌ Failed to retrieve company overview: {e}")
+        logger.error(
+            f"get_company_overview | Failed: {e}"
+        )
 
         return {
             "overview": []
@@ -89,7 +91,9 @@ def generate_search_query(state: AgentState) -> dict:
         }
 
     except Exception as e:
-        print(f"❌ Failed to generate search query: {e}")
+        logger.error(
+            f"generate_search_query | Failed: {e}"
+        )
 
         return {
             "search_query": f"{state['company_name']} latest news 2026"
@@ -202,10 +206,12 @@ def generate_followup_search_query(state: AgentState) -> dict:
         }
 
     except Exception as e:
-        print(f"❌ Failed to generate follow-up search query: {e}")
+        logger.error(
+            f"generate_followup_search_query | Failed: {e}"
+        )
 
         return {
-            "search_query": f"{state['company_name']} latest company news"
+            "search_query": state["search_query"]
         }
 
 def write_email(state: AgentState) -> dict:
