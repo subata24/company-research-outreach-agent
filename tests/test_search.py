@@ -7,6 +7,7 @@ def test_search_web_returns_results():
     fake_results = [
         {
             "title": "Test Company News",
+            "href": "https://example.com/test-company-news",
             "body": "This is a test result."
         }
     ]

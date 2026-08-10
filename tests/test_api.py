@@ -81,3 +81,63 @@ def test_research_workflow_failure():
     assert response.json()["detail"] == (
         "Research workflow failed. Please try again later."
     )
+
+
+def test_research_followup_workflow():
+    first_result = {
+        "company_name": "TestCompany",
+        "search_query": "TestCompany latest news",
+        "news": [
+            {
+                "title": "Initial result",
+                "body": "Limited information"
+            }
+        ],
+        "enough_information": False,
+        "evaluation_reasoning": "More information is needed.",
+        "missing_information": ["Recent AI projects"],
+        "email": "",
+        "retry_count": 1,
+    }
+
+    second_result = {
+        "company_name": "TestCompany",
+        "search_query": "TestCompany recent AI projects",
+        "news": [
+            {
+                "title": "AI project announced",
+                "body": "TestCompany announced a new AI project."
+            }
+        ],
+        "enough_information": True,
+        "evaluation_reasoning": "Enough information found.",
+        "missing_information": [],
+        "email": "Subject: Internship Inquiry",
+        "retry_count": 2,
+    }
+
+    with patch(
+        "app.api.routes.graph.stream",
+        return_value=iter([first_result, second_result])
+    ) as mock_stream:
+
+        response = client.post(
+            "/research",
+            json={"company_name": "TestCompany"}
+        )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["company"] == "TestCompany"
+    assert data["search_query"] == (
+        "TestCompany recent AI projects"
+    )
+    assert data["evaluation"]["enough_information"] is True
+    assert data["evaluation"]["reasoning"] == (
+        "Enough information found."
+    )
+    assert data["email"] == "Subject: Internship Inquiry"
+
+    mock_stream.assert_called_once()
