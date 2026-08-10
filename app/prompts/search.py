@@ -38,6 +38,23 @@ Prefer recent sources from:
 - Major business publications
 - Official company announcements
 
+The search should prioritize:
+- Recent company announcements
+- Recent AI or technology initiatives
+- Product launches
+- Strategic partnerships
+- Research or engineering developments
+- Careers or internship-relevant developments
+
+IMPORTANT:
+- Prioritize the most recent available information.
+- Do NOT invent or assume a year.
+- Do NOT use outdated years such as 2024 or 2025 unless the company
+  specifically has no recent relevant information.
+- Prefer official company/newsroom sources when possible.
+- Return ONLY the search query.
+
+
 Return ONLY the search query.
 Do not explain.
 """

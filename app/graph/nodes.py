@@ -182,6 +182,9 @@ def route_after_evaluation(state: AgentState) -> str:
         return "write_email"
 
     if state["retry_count"] >= 3:
+        logger.warning(
+            "route_after_evaluation | Maximum retries reached"
+        )
         return "write_email"
 
     return "generate_followup_search_query"
@@ -189,20 +192,33 @@ def route_after_evaluation(state: AgentState) -> str:
 
 def generate_followup_search_query(state: AgentState) -> dict:
     """
-    Generate a follow-up search query if the initial information is insufficient.
+    Generate a follow-up search query when the initial research
+    does not contain enough information.
     """
+
+    logger.info(
+        "generate_followup_search_query | Started"
+    )
 
     try:
         prompt = FOLLOWUP_SEARCH_PROMPT.format(
             company_name=state["company_name"],
             overview=format_search_results(state["overview"]),
-            news=format_search_results(state["news"])
+            news=format_search_results(state["news"]),
+            missing_information=", ".join(
+                state.get("missing_information", [])
+            ),
         )
 
         response = llm.invoke(prompt)
+        search_query = response.text.strip()
+
+        logger.info(
+            f"generate_followup_search_query | Query: {search_query}"
+        )
 
         return {
-            "search_query": response.text.strip()
+            "search_query": search_query
         }
 
     except Exception as e:
@@ -211,7 +227,9 @@ def generate_followup_search_query(state: AgentState) -> dict:
         )
 
         return {
-            "search_query": state["search_query"]
+            "search_query": (
+                f"{state['company_name']} latest news 2026"
+            )
         }
 
 def write_email(state: AgentState) -> dict:

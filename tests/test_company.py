@@ -20,3 +20,17 @@ def test_company_overview_returns_results():
         })
 
     assert result == fake_results
+
+
+def test_company_overview_handles_failure():
+    from unittest.mock import patch
+
+    with patch(
+        "app.tools.company.ddgs.text",
+        side_effect=Exception("Search failed")
+    ):
+        result = company_overview.invoke({
+            "company_name": "Intel"
+        })
+
+    assert result == []

@@ -20,3 +20,16 @@ def test_search_web_returns_results():
         })
 
     assert result == fake_results
+
+def test_search_web_handles_failure():
+    from unittest.mock import patch
+
+    with patch(
+        "app.tools.search.ddgs.text",
+        side_effect=Exception("Search failed")
+    ):
+        result = search_web.invoke({
+            "query": "Intel latest news"
+        })
+
+    assert result == []

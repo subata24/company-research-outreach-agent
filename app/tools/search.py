@@ -7,6 +7,9 @@ real-time web searches.
 
 from ddgs import DDGS
 from langchain_core.tools import tool
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 # Shared DDGS client
 ddgs = DDGS()
@@ -16,14 +19,19 @@ ddgs = DDGS()
 def search_web(query: str) -> list[dict]:
     """
     Search the web for recent information.
-
-    Args:
-        query: The search query.
-
-    Returns:
-        A list of search results, where each result is a dictionary
-        containing information such as the title, URL, and snippet.
     """
-    results = ddgs.text(query, max_results=5)
 
-    return list(results)
+    try:
+        results = ddgs.text(
+            query,
+            max_results=5
+        )
+
+        return list(results)
+
+    except Exception as e:
+        logger.error(
+            f"search_web | Search failed: {e}"
+        )
+
+        return []

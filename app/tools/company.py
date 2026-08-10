@@ -8,6 +8,9 @@ research process.
 
 from ddgs import DDGS
 from langchain_core.tools import tool
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 # Shared DDGS client
 ddgs = DDGS()
@@ -17,16 +20,21 @@ ddgs = DDGS()
 def company_overview(company_name: str) -> list[dict]:
     """
     Retrieve a general overview of a company.
-
-    Args:
-        company_name: The name of the company.
-
-    Returns:
-        A list of search results containing general information
-        about the company.
     """
-    query = f"{company_name} company overview"
 
-    results = ddgs.text(query, max_results=3)
+    try:
+        query = f"{company_name} company overview"
 
-    return list(results)
+        results = ddgs.text(
+            query,
+            max_results=3
+        )
+
+        return list(results)
+
+    except Exception as e:
+        logger.error(
+            f"company_overview | Search failed: {e}"
+        )
+
+        return []
