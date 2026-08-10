@@ -1,12 +1,19 @@
 # Environment variables
 .env
+.env.*
+!.env.example
 
-# Virtual environment
+# Python virtual environment
 .venv/
 
 # Python cache
 __pycache__/
 *.py[cod]
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
 
 # VS Code
 .vscode/
@@ -14,3 +21,12 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Frontend environment variables
+frontend/.env.local
+frontend/.env.*.local
