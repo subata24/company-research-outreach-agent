@@ -79,6 +79,10 @@ def research_company(request: ResearchRequest):
             "news": result["news"],
             "evaluation": {
                 "enough_information": result["enough_information"],
+                "needs_clarification": result.get(
+                    "clarification_needed",
+                    False
+              ),
                 "reasoning": result.get(
                     "evaluation_reasoning",
                     ""

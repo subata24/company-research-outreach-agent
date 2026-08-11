@@ -3,28 +3,38 @@
 import { useState } from "react";
 
 type NewsItem = {
-title: string;
-body: string;
-href?: string;
+  title: string;
+  body: string;
+  href: string;
 };
 
 type ResearchResult = {
-company: string;
-search_query: string;
-news: NewsItem[];
-evaluation: {
-enough_information: boolean;
-reasoning: string;
-missing_information: string[];
+  status: "success";
+  company: string;
+  search_query: string;
+  news: NewsItem[];
+  evaluation: {
+    enough_information: boolean;
+    needs_clarification: boolean;
+    reasoning: string;
+    missing_information: string[];
+  };
+  email: string;
 };
-email: string;
+
+type ClarificationResult = {
+  status: "clarification_required";
+  company: string;
+  message: string;
 };
 
 export default function Home() {
 const [company, setCompany] = useState("");
 const [loading, setLoading] = useState(false);
 const [error, setError] = useState("");
-const [result, setResult] = useState<ResearchResult | null>(null);
+const [result, setResult] = useState<
+  ResearchResult | ClarificationResult | null
+>(null);
 const [copied, setCopied] = useState(false);
 
 async function handleResearch() {
@@ -72,15 +82,15 @@ try {
 }
 
 async function copyEmail() {
-if (!result?.email) return;
+  if (!result || result.status !== "success") return;
+  if (!result.email) return;
 
-await navigator.clipboard.writeText(result.email);
-setCopied(true);
+  await navigator.clipboard.writeText(result.email);
+  setCopied(true);
 
-setTimeout(() => {
-  setCopied(false);
-}, 2000);
-
+  setTimeout(() => {
+    setCopied(false);
+  }, 2000);
 }
 
 return (
@@ -108,8 +118,9 @@ return (
       </h1>
 
       <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-gray-400 sm:text-lg">
-        Research a company, analyze the latest information, and
-        generate a personalized internship outreach email in seconds.
+             Research a company, analyze the latest information, and
+             generate a personalized internship outreach email in seconds.
+             If the company name is ambiguous, the agent will ask for clarification.
       </p>
     </header>
 
@@ -127,7 +138,7 @@ return (
                 handleResearch();
               }
             }}
-            placeholder="Enter a company name..."
+            placeholder="Enter a company name or website..."
             className="min-w-0 flex-1 rounded-xl border border-transparent bg-transparent px-5 py-4 text-base text-white outline-none placeholder:text-gray-600 focus:border-white/10"
           />
 
@@ -165,8 +176,34 @@ return (
       </section>
     )}
 
-    {/* Results */}
-    {result && (
+    {/* Clarification required */}
+    {result?.status === "clarification_required" && (
+      <section className="mx-auto max-w-3xl rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6">
+        <div className="flex items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-xl">
+            ⚠️
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold text-amber-300">
+              Company identification needed
+            </h2>
+
+            <p className="mt-2 text-sm leading-7 text-gray-400">
+              {result.message}
+            </p>
+
+            <p className="mt-4 text-sm text-gray-500">
+              Try entering the company&apos;s full name, official website,
+              or another detail that uniquely identifies it.
+            </p>
+          </div>
+        </div>
+      </section>
+    )}
+
+    {/* Normal results */}
+    {result?.status === "success" && (
       <div className="space-y-6">
 
         {/* Company overview */}
