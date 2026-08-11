@@ -32,6 +32,8 @@ def research_company(request: ResearchRequest):
         "missing_information": [],
         "email": "",
         "retry_count": 0,
+        "clarification_needed": False,
+        "clarification_message": "",
     }
 
     try:
@@ -53,7 +55,25 @@ def research_company(request: ResearchRequest):
             f"research_company | Completed for {company_name}"
         )
 
+        # The agent could not confidently identify the company.
+        if result.get("clarification_needed", False):
+            logger.warning(
+                f"research_company | "
+                f"Clarification required for {company_name}"
+            )
+
+            return {
+                "status": "clarification_required",
+                "company": result["company_name"],
+                "message": result.get(
+                    "clarification_message",
+                    "Please provide the company's full name or website."
+                ),
+            }
+
+        # Normal successful research response.
         return {
+            "status": "success",
             "company": result["company_name"],
             "search_query": result["search_query"],
             "news": result["news"],

@@ -12,6 +12,11 @@ class ResearchEvaluation(BaseModel):
         description="Whether enough reliable information has been collected."
     )
 
+    needs_clarification: bool = Field(
+        description="Whether clarification is needed to complete the research."
+    )
+
+
     reasoning: str = Field(
         description="Brief explanation of why the collected information is or is not sufficient."
     )

@@ -19,3 +19,5 @@ class AgentState(TypedDict):
     missing_information: list[str]
     email: str
     retry_count: int
+    clarification_needed: bool
+    clarification_message: str

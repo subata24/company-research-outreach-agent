@@ -13,6 +13,7 @@ from app.graph.nodes import (
     evaluate_information,
     generate_followup_search_query,
     write_email,
+    request_clarification,
     route_after_evaluation,
 )
 
@@ -54,6 +55,11 @@ builder.add_node(
     write_email,
 )
 
+builder.add_node(
+    "request_clarification",
+    request_clarification,
+)
+
 
 # Define execution flow
 
@@ -83,6 +89,7 @@ builder.add_conditional_edges(
     {
         "generate_followup_search_query": "generate_followup_search_query",
         "write_email": "write_email",
+        "request_clarification": "request_clarification",
     },
 )
 
@@ -92,9 +99,15 @@ builder.add_edge(
 )
 
 builder.add_edge(
+    "request_clarification",
+    END,
+)
+
+builder.add_edge(
     "write_email",
     END,
 )
+
 
 
 # Compile the workflow

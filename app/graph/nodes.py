@@ -4,7 +4,7 @@ LangGraph nodes for the Company Research & Outreach Agent.
 Each node performs a single responsibility and returns only the
 state updates that LangGraph should merge into the shared state.
 """
-
+import os
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -25,14 +25,10 @@ logger = get_logger(__name__)
 load_dotenv()
 
 # Shared LLM instance
+
 llm = ChatGoogleGenerativeAI(
-    model="gemini-3.1-flash-lite"
+    model=os.getenv("GOOGLE_MODEL", "gemini-3.1-flash-lite")
 )
-
-#llm = ChatGoogleGenerativeAI(
-    #model="gemini-3.6-flash"
-#)
-
 
 def get_company_overview(state: AgentState) -> dict:
     """
@@ -127,11 +123,32 @@ def search_company_news(state: AgentState) -> dict:
             "news": []
         }
 
+        
+
 def evaluate_information(state: AgentState) -> dict:
     """
     Determine whether enough information has been collected
     using structured LLM output.
     """
+
+    # No search results means we definitely need more research.
+    if not state["news"]:
+        logger.warning(
+            "evaluate_information | No news results found"
+        )
+
+        return {
+            "enough_information": False,
+            "needs_clarification": False,
+            "evaluation_reasoning": (
+                "No web search results were found. "
+                "Additional research is required."
+            ),
+            "missing_information": [
+                "Recent company information"
+            ],
+            "retry_count": state["retry_count"] + 1,
+        }
 
     prompt = EVALUATION_PROMPT.format(
         company_name=state["company_name"],
@@ -142,20 +159,30 @@ def evaluate_information(state: AgentState) -> dict:
     try:
         logger.info("evaluate_information | Started")
 
-        structured_llm = llm.with_structured_output(ResearchEvaluation)
+        structured_llm = llm.with_structured_output(
+            ResearchEvaluation
+        )
 
         evaluation = structured_llm.invoke(prompt)
 
         logger.info(
-            f"evaluate_information | enough_info={evaluation.enough_info}"
+            f"evaluate_information | "
+            f"enough_info={evaluation.enough_info}"
         )
 
         logger.info(
-            f"evaluate_information | reasoning={evaluation.reasoning}"
+            f"evaluate_information | "
+            f"needs_clarification={evaluation.needs_clarification}"
+        )
+
+        logger.info(
+            f"evaluate_information | "
+            f"reasoning={evaluation.reasoning}"
         )
 
         return {
             "enough_information": evaluation.enough_info,
+            "clarification_needed": evaluation.needs_clarification,
             "evaluation_reasoning": evaluation.reasoning,
             "missing_information": evaluation.missing_info,
             "retry_count": state["retry_count"] + 1,
@@ -166,28 +193,65 @@ def evaluate_information(state: AgentState) -> dict:
             f"evaluate_information | Evaluation failed: {e}"
         )
 
-        # If evaluation fails, don't keep retrying indefinitely.
+        # If evaluation itself fails, don't keep retrying indefinitely.
         return {
             "enough_information": True,
+            "clarification_needed": False,
             "retry_count": state["retry_count"] + 1,
         }
     
 
 def route_after_evaluation(state: AgentState) -> str:
     """
-    Decide whether to generate the email or perform another search.
+    Decide what the agent should do after evaluating research.
     """
 
+    # The company could not be identified confidently.
+    # Stop researching and ask the user for clarification.
+    if state.get("clarification_needed", False):
+        logger.warning(
+            "route_after_evaluation | "
+            "Clarification required for company identification"
+        )
+        return "request_clarification"
+
+    # Research is sufficient.
     if state["enough_information"]:
         return "write_email"
 
+    # Prevent unlimited research loops.
     if state["retry_count"] >= 3:
         logger.warning(
             "route_after_evaluation | Maximum retries reached"
         )
         return "write_email"
 
+    # More research is still useful.
     return "generate_followup_search_query"
+
+
+def request_clarification(state: AgentState) -> dict:
+    """
+    Prepare a message asking the user to clarify the target company.
+    """
+
+    logger.warning(
+        f"request_clarification | "
+        f"Unable to confidently identify {state['company_name']}"
+    )
+
+    message = (
+        f'I could not confidently identify the company '
+        f'"{state["company_name"]}". '
+        "Please provide the company's full name or website "
+        "so I can research the correct organization."
+    )
+
+    return {
+        "clarification_needed": True,
+        "clarification_message": message,
+        "email": "",
+    }
 
 
 def generate_followup_search_query(state: AgentState) -> dict:
