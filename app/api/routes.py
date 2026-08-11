@@ -61,7 +61,7 @@ def research_company(request: ResearchRequest):
                 f"research_company | "
                 f"Clarification required for {company_name}"
             )
-
+            
             return {
                 "status": "clarification_required",
                 "company": result["company_name"],
@@ -70,19 +70,29 @@ def research_company(request: ResearchRequest):
                     "Please provide the company's full name or website."
                 ),
             }
+        
+
+        logger.info(
+            f"research_company | Overview items: {len(result.get('overview', []))}"
+        )
+        logger.info(
+            f"research_company | Overview data: {result.get('overview', [])}"
+        )
 
         # Normal successful research response.
         return {
             "status": "success",
             "company": result["company_name"],
+            "overview": result.get("overview", ""),
             "search_query": result["search_query"],
             "news": result["news"],
+
             "evaluation": {
                 "enough_information": result["enough_information"],
                 "needs_clarification": result.get(
                     "clarification_needed",
                     False
-              ),
+                ),
                 "reasoning": result.get(
                     "evaluation_reasoning",
                     ""
@@ -92,6 +102,29 @@ def research_company(request: ResearchRequest):
                     []
                 ),
             },
+
+            "workflow": {
+                "company_identified": True,
+                "search_strategy_generated": bool(
+                    result.get("search_query")
+                ),
+                "research_completed": bool(
+                    result.get("overview") or result.get("news")
+                ),
+                "research_evaluated": True,
+                "follow_up_research": result.get(
+                    "retry_count",
+                    0
+                ) > 0,
+                "retry_count": result.get(
+                    "retry_count",
+                    0
+                ),
+                "email_generated": bool(
+                    result.get("email")
+                ),
+            },
+
             "email": result["email"],
         }
 

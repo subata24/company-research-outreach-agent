@@ -11,7 +11,7 @@ class AgentState(TypedDict):
     """Represents the shared state passed between agent nodes."""
     
     company_name: str
-    overview: list
+    overview: list[dict]
     news: list
     search_query: str
     enough_information: bool
