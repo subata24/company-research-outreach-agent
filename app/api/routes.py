@@ -69,8 +69,11 @@ def research_company(request: ResearchRequest):
                     "clarification_message",
                     "Please provide the company's full name or website."
                 ),
+                "reasoning": result.get(
+                     "evaluation_reasoning",
+                     ""
+                ),
             }
-        
 
         logger.info(
             f"research_company | Overview items: {len(result.get('overview', []))}"

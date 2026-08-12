@@ -46,6 +46,7 @@ type ClarificationResult = {
   status: "clarification_required";
   company: string;
   message: string;
+  reasoning: string;
 };
 
 type Result = ResearchResult | ClarificationResult;
@@ -909,6 +910,30 @@ export default function Home() {
                 <p className="mt-3 text-sm leading-7 text-gray-400">
                   {result.message}
                 </p>
+                
+                {result.reasoning && (
+                  <div
+                    style={{
+                      background: PANEL_SOFT,
+                      borderColor: BORDER_SOFT,
+                    }}
+                    className="mt-5 rounded-xl border p-4"
+                  >
+                    <p
+                      style={{
+                        fontFamily: MONO_FONT,
+                        color: FAINT,
+                      }}
+                      className="text-[10px] font-semibold uppercase tracking-[0.15em]"
+                    >
+                      Why clarification is needed
+                    </p>
+
+                    <p className="mt-2 text-sm leading-6 text-gray-400">
+                      {result.reasoning}
+                    </p>
+                  </div>
+                )}
 
                 <div
                   style={{
