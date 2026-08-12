@@ -18,25 +18,15 @@ ddgs = DDGS()
 
 def _search_and_validate(query: str) -> list[dict]:
     """
-    Execute a DDGS search and return only valid results.
+    Execute a DDGS search, validate results, rank them,
+    and return the strongest recent sources.
     """
 
     results = ddgs.text(
         query,
-        timelimit="y",
         max_results=10,
     )
 
-    logger.info(
-        f"search_web | DDGS returned {len(results or [])} candidates"
-    )
-
-    for i, result in enumerate(results or [], start=1):
-        logger.info(
-            f"search_web | Candidate {i}: "
-            f"{result.get('title', '')} | "
-            f"{result.get('href', '')}"
-        )
     if results is None:
         logger.warning(
             "search_web | Search provider returned no response"
@@ -52,9 +42,8 @@ def _search_and_validate(query: str) -> list[dict]:
         title = result.get("title")
         body = result.get("body", "")
         href = result.get("href")
+        date = result.get("date", "")
 
-        # A result needs a title and source URL.
-        # Body text is optional.
         if not title or not href:
             logger.warning(
                 "search_web | Skipping result without title or href"
@@ -66,10 +55,115 @@ def _search_and_validate(query: str) -> list[dict]:
                 "title": title,
                 "body": body or "",
                 "href": href,
+                "date": date or "",
             }
         )
 
-    return valid_results
+    logger.info(
+        f"search_web | DDGS returned "
+        f"{len(valid_results)} valid candidates"
+    )
+
+    # -------------------------------------------------
+    # Rank candidates by research usefulness
+    # -------------------------------------------------
+
+    def score_result(result: dict) -> int:
+        title = result["title"].lower()
+        body = result["body"].lower()
+        href = result["href"].lower()
+        date = result.get("date", "").lower()
+
+        text = f"{title} {body}"
+
+        score = 0
+
+        # Prefer official company sources.
+        if "microsoft.com" in href:
+            score += 5
+
+        if "blogs.microsoft.com" in href:
+            score += 3
+
+        if "news.microsoft.com" in href:
+            score += 3
+
+        if "azure.microsoft.com" in href:
+            score += 3
+
+        # Prefer AI/ML/engineering/research relevance.
+        relevant_terms = [
+            "artificial intelligence",
+            "ai",
+            "machine learning",
+            "research",
+            "engineering",
+            "infrastructure",
+            "copilot",
+            "azure",
+            "agentic",
+            "scientific",
+            "technology",
+        ]
+
+        for term in relevant_terms:
+            if term in text:
+                score += 1
+
+        # Prefer explicitly recent results.
+        recent_terms = [
+            "2026",
+            "today",
+            "hours ago",
+            "days ago",
+            "weeks ago",
+            "month ago",
+        ]
+
+        for term in recent_terms:
+            if term in text or term in date:
+                score += 3
+
+        # Penalize generic/reference content.
+        low_value_terms = [
+            "wikipedia",
+            "company overview",
+            "history",
+            "stock",
+            "market",
+            "share price",
+        ]
+
+        for term in low_value_terms:
+            if term in text:
+                score -= 4
+
+        result["_score"] = score
+
+        return score
+
+    for result in valid_results:
+        score_result(result)
+
+    valid_results.sort(
+        key=lambda result: result["_score"],
+        reverse=True,
+    )
+
+    # Keep only the strongest research sources.
+    top_results = valid_results[:5]
+
+    for index, result in enumerate(top_results, start=1):
+        logger.info(
+            f"search_web | Selected {index}: "
+            f"{result['title']} | score={result['_score']}"
+        )
+
+    # Remove internal scoring metadata before returning.
+    for result in top_results:
+        result.pop("_score", None)
+
+    return top_results
 
 
 @tool
