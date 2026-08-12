@@ -119,9 +119,9 @@ def search_company_news(state: AgentState) -> dict:
             f"search_company_news | Search failed: {e}"
         )
 
-        return {
-            "news": []
-        }
+        raise RuntimeError(
+            "Company research could not complete because the web search service failed."
+        ) from e
 
         
 

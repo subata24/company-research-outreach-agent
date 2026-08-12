@@ -128,15 +128,21 @@ def research_company(request: ResearchRequest):
             "email": result["email"],
         }
 
-    except HTTPException:
-        raise
-
     except Exception as e:
         logger.error(
             f"research_company | Workflow failed: {e}"
         )
 
+        error_message = str(e)
+
+        if "web search service failed" in error_message.lower():
+            raise HTTPException(
+                status_code=503,
+                detail="Web research is temporarily unavailable. Please try again later."
+            )
+
         raise HTTPException(
             status_code=500,
             detail="Research workflow failed. Please try again later."
         )
+    
