@@ -11,7 +11,7 @@ Company:
 Company Overview:
 {overview}
 
-Generate ONE focused Google search query for recent, meaningful company developments.
+Generate ONE focused web search query for recent, meaningful company developments.
 
 The search should prioritize information useful for personalizing an AI/ML internship outreach email.
 
@@ -38,22 +38,17 @@ Prefer recent sources from:
 - Major business publications
 - Official company announcements
 
-The search should prioritize:
-- Recent company announcements
-- Recent AI or technology initiatives
-- Product launches
-- Strategic partnerships
-- Research or engineering developments
-- Careers or internship-relevant developments
-
-IMPORTANT:
-- Prioritize the most recent available information.
-- Do NOT invent or assume a year.
-- Do NOT use outdated years such as 2024 or 2025 unless the company
-  specifically has no recent relevant information.
-- Prefer official company/newsroom sources when possible.
-- Return ONLY the search query.
-
+Query construction rules:
+- Use the company name.
+- Include 2-4 highly relevant topic keywords.
+- Prefer official company/newsroom sources when appropriate.
+- Focus the query on recent AI, ML, engineering, research, product, or technology developments.
+- Do NOT include any year in the query.
+- Do NOT include a specific date in the query.
+- Do NOT assume a publication year from the company overview.
+- Do NOT copy dates or years from the company overview into the query.
+- Do NOT generate a generic "latest news" query.
+- The search system will handle recency separately.
 
 Return ONLY the search query.
 Do not explain.

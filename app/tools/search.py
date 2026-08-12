@@ -23,10 +23,20 @@ def _search_and_validate(query: str) -> list[dict]:
 
     results = ddgs.text(
         query,
-        max_results=5,
+        timelimit="y",
+        max_results=10,
     )
 
+    logger.info(
+        f"search_web | DDGS returned {len(results or [])} candidates"
+    )
 
+    for i, result in enumerate(results or [], start=1):
+        logger.info(
+            f"search_web | Candidate {i}: "
+            f"{result.get('title', '')} | "
+            f"{result.get('href', '')}"
+        )
     if results is None:
         logger.warning(
             "search_web | Search provider returned no response"
