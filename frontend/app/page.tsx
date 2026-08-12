@@ -464,9 +464,18 @@ export default function Home() {
     setCopied(false);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/research`,
-        {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        throw new Error(
+          "The research service is not configured. Please check the frontend environment settings."
+        );
+      }
+
+      let response: Response;
+
+      try {
+        response = await fetch(`${apiUrl}/research`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -474,8 +483,12 @@ export default function Home() {
           body: JSON.stringify({
             company_name: company.trim(),
           }),
-        }
-      );
+        });
+      } catch {
+        throw new Error(
+          "The research backend is unavailable. Please make sure the backend is running and try again."
+        );
+      }
 
       let data: Result | { detail?: string };
 
@@ -494,7 +507,25 @@ export default function Home() {
 
         throw new Error(
           errorData.detail ||
-            "Research failed. Please try again."
+            `Research failed with status ${response.status}. Please try again.`
+        );
+      }
+
+      if (!data || typeof data !== "object") {
+        throw new Error(
+          "The backend returned an empty or invalid research result."
+        );
+      }
+
+      if (
+        !data ||
+        typeof data !== "object" ||
+        !("status" in data) ||
+        (data.status !== "success" &&
+          data.status !== "clarification_required")
+      ) {
+        throw new Error(
+          "The backend returned an unexpected research result."
         );
       }
 
@@ -503,7 +534,7 @@ export default function Home() {
       setError(
         error instanceof Error
           ? error.message
-          : "Something went wrong. Please try again."
+          : "Something went wrong while researching the company."
       );
     } finally {
       setLoading(false);
