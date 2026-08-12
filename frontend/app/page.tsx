@@ -454,94 +454,83 @@ export default function Home() {
   ========================================================= */
 
   async function handleResearch() {
-    if (!company.trim()) {
-      setError("Please enter a company name.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setResult(null);
-    setCopied(false);
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      if (!apiUrl) {
-        throw new Error(
-          "The research service is not configured. Please check the frontend environment settings."
-        );
-      }
-
-      let response: Response;
-
-      try {
-        response = await fetch(`${apiUrl}/research`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            company_name: company.trim(),
-          }),
-        });
-      } catch {
-        throw new Error(
-          "The research backend is unavailable. Please make sure the backend is running and try again."
-        );
-      }
-
-      let data: Result | { detail?: string };
-
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error(
-          "The backend returned an invalid response. Please try again."
-        );
-      }
-
-      console.log("API RESPONSE:", data);
-
-      if (!response.ok) {
-        const errorData = data as { detail?: string };
-
-        throw new Error(
-          errorData.detail ||
-            `Research failed with status ${response.status}. Please try again.`
-        );
-      }
-
-      if (!data || typeof data !== "object") {
-        throw new Error(
-          "The backend returned an empty or invalid research result."
-        );
-      }
-
-      if (
-        !data ||
-        typeof data !== "object" ||
-        !("status" in data) ||
-        (data.status !== "success" &&
-          data.status !== "clarification_required")
-      ) {
-        throw new Error(
-          "The backend returned an unexpected research result."
-        );
-      }
-
-      setResult(data as Result);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong while researching the company."
-      );
-    } finally {
-      setLoading(false);
-    }
+  if (!company.trim()) {
+    setError("Please enter a company name.");
+    return;
   }
 
+  setLoading(true);
+  setError("");
+  setResult(null);
+  setCopied(false);
+
+  try {
+    let response: Response;
+
+    try {
+      response = await fetch("/api/research", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          company_name: company.trim(),
+        }),
+      });
+    } catch {
+      throw new Error(
+        "The research backend is unavailable. Please make sure the backend is running and try again."
+      );
+    }
+
+    let data: Result | { detail?: string };
+
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error(
+        "The backend returned an invalid response. Please try again."
+      );
+    }
+
+    console.log("API RESPONSE:", data);
+
+    if (!response.ok) {
+      const errorData = data as { detail?: string };
+
+      throw new Error(
+        errorData.detail ||
+          `Research failed with status ${response.status}. Please try again.`
+      );
+    }
+
+    if (!data || typeof data !== "object") {
+      throw new Error(
+        "The backend returned an empty or invalid research result."
+      );
+    }
+
+    if (
+      !("status" in data) ||
+      (data.status !== "success" &&
+        data.status !== "clarification_required")
+    ) {
+      throw new Error(
+        "The backend returned an unexpected research result."
+      );
+    }
+
+    setResult(data as Result);
+  } catch (error) {
+    setError(
+      error instanceof Error
+        ? error.message
+        : "Something went wrong while researching the company."
+    );
+  } finally {
+    setLoading(false);
+  }
+}
   /* =========================================================
      COPY EMAIL
   ========================================================= */
