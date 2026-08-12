@@ -300,7 +300,7 @@ def write_email(state: AgentState) -> dict:
     """
     Generate a personalized outreach email.
     """
-
+    
     try:
         logger.info("write_email | Started")
 
@@ -312,12 +312,24 @@ def write_email(state: AgentState) -> dict:
 
         response = llm.invoke(prompt)
 
+        if not response or not getattr(response, "text", None):
+            raise RuntimeError(
+                "LLM returned an empty response."
+            )
+
+        email = response.text.strip()
+
+        if not email:
+            raise RuntimeError(
+                "LLM returned an empty email."
+            )
+
         logger.info(
             "write_email | Email generated successfully"
         )
 
         return {
-            "email": response.text.strip()
+            "email": email
         }
 
     except Exception as e:
@@ -325,10 +337,6 @@ def write_email(state: AgentState) -> dict:
             f"write_email | Email generation failed: {e}"
         )
 
-        return {
-            "email": (
-                f"Unable to generate an outreach email for "
-                f"{state['company_name']} because the AI service "
-                f"is currently unavailable."
-            )
-        }
+        raise RuntimeError(
+            "LLM service failed while generating the outreach email."
+        ) from e

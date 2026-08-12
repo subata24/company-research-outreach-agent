@@ -133,12 +133,24 @@ def research_company(request: ResearchRequest):
             f"research_company | Workflow failed: {e}"
         )
 
-        error_message = str(e)
+        error_message = str(e).lower()
 
-        if "web search service failed" in error_message.lower():
+        if "web search service failed" in error_message:
             raise HTTPException(
                 status_code=503,
-                detail="Web research is temporarily unavailable. Please try again later."
+                detail=(
+                    "Web research is temporarily unavailable. "
+                    "Please try again later."
+                )
+            )
+
+        if "llm service failed" in error_message:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "The AI writing service is temporarily unavailable. "
+                    "Please try again later."
+                )
             )
 
         raise HTTPException(
