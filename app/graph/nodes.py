@@ -324,9 +324,7 @@ def write_email(state: AgentState) -> dict:
                 "LLM returned an empty email."
             )
 
-        logger.info(
-            "write_email | Email generated successfully"
-        )
+        email = response.text.strip()
 
         return {
             "email": email
