@@ -468,7 +468,7 @@ export default function Home() {
     let response: Response;
 
     try {
-      response = await fetch("/api/research", {
+      response = await fetch("/svc/api/research", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

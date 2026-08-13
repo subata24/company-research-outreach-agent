@@ -1,4 +1,4 @@
-{
+﻿{
   "services": {
     "frontend": {
       "root": "frontend/",
@@ -6,12 +6,12 @@
     },
     "backend": {
       "root": "./",
-      "entrypoint": "app/api/main.py"
+      "entrypoint": "api/index.py"
     }
   },
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/svc/api/:path*",
       "destination": {
         "service": "backend"
       }
