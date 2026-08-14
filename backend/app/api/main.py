@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router
@@ -13,6 +13,9 @@ app = FastAPI(
         "internship outreach email generator."
     ),
     version="1.0.0",
+    openapi_url="/svc/api/openapi.json",
+    docs_url="/svc/api/docs",
+    redoc_url="/svc/api/redoc",
 )
 
 
@@ -20,6 +23,7 @@ frontend_url = os.getenv(
     "FRONTEND_URL",
     "http://localhost:3000",
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,12 +34,17 @@ app.add_middleware(
 )
 
 
-app.include_router(router)
+svc_api = APIRouter(prefix="/svc/api")
 
 
-@app.get("/")
+@svc_api.get("/")
 def health_check():
     return {
         "status": "healthy",
         "service": "Company Research & Outreach Agent",
     }
+
+
+svc_api.include_router(router)
+
+app.include_router(svc_api)
