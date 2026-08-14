@@ -30,7 +30,7 @@ def test_research_success():
         return_value=iter([fake_result])
     ):
         response = client.post(
-            "/research",
+            "/svc/api/research",
             json={"company_name": "Intel"}
         )
 
@@ -48,7 +48,7 @@ def test_research_success():
 
 def test_research_empty_company():
     response = client.post(
-        "/research",
+        "/svc/api/research",
         json={"company_name": ""}
     )
 
@@ -60,7 +60,7 @@ def test_research_empty_company():
 
 def test_research_one_character_company():
     response = client.post(
-        "/research",
+        "/svc/api/research",
         json={"company_name": "I"}
     )
 
@@ -73,7 +73,7 @@ def test_research_workflow_failure():
         side_effect=Exception("Gemini API failed")
     ):
         response = client.post(
-            "/research",
+            "/svc/api/research",
             json={"company_name": "Intel"}
         )
 
@@ -122,7 +122,7 @@ def test_research_followup_workflow():
     ) as mock_stream:
 
         response = client.post(
-            "/research",
+            "/svc/api/research",
             json={"company_name": "TestCompany"}
         )
 

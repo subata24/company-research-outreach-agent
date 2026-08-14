@@ -1,5 +1,7 @@
 from unittest.mock import patch
 
+import pytest
+
 from app.tools.search import search_web
 
 
@@ -8,7 +10,8 @@ def test_search_web_returns_results():
         {
             "title": "Test Company News",
             "href": "https://example.com/test-company-news",
-            "body": "This is a test result."
+            "body": "This is a test result.",
+            "date": "2026-08-14",
         }
     ]
 
@@ -22,15 +25,16 @@ def test_search_web_returns_results():
 
     assert result == fake_results
 
-def test_search_web_handles_failure():
-    from unittest.mock import patch
 
+def test_search_web_handles_failure():
     with patch(
         "app.tools.search.ddgs.text",
         side_effect=Exception("Search failed")
     ):
-        result = search_web.invoke({
-            "query": "Intel latest news"
-        })
-
-    assert result == []
+        with pytest.raises(
+            RuntimeError,
+            match="Web search failed"
+        ):
+            search_web.invoke({
+                "query": "Intel latest news"
+            })
